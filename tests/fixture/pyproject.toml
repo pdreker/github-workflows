@@ -1,0 +1,49 @@
+# Self-test project for python-ci.yaml. The tool tables below are a verbatim copy of
+# templates/pyproject-tools.toml, so the self-test also checks the template; keep them
+# in step. Only deviation: pytest pythonpath, because this project is not installed.
+
+[project]
+name = "fixture"
+version = "0.0.0"
+requires-python = ">=3.14"
+
+[dependency-groups]
+dev = ["pytest", "ruff", "ty"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+  "E", "W", "F", "C90", "I", "N", "UP", "YTT", "ANN", "ASYNC", "S", "BLE", "FBT", "B",
+  "A", "COM", "C4", "DTZ", "T10", "EM", "FA", "ISC", "G", "INP", "PIE", "T20", "PT", "Q",
+  "RSE", "RET", "SLF", "SLOT", "SIM", "INT", "ARG", "PTH", "TD", "FIX", "PGH", "PL", "TRY",
+  "FLY", "PERF", "FURB", "LOG", "RUF",
+]
+ignore = [
+  "E203",   # whitespace before ':', conflicts with the formatter
+  "COM812", # trailing comma, conflicts with the formatter
+  "ISC001", # implicit string concatenation, conflicts with the formatter
+  "ANN204", # return type of __init__ and other special methods
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests are linted like the rest; only rules that make no sense there are off.
+"tests/**" = [
+  "S101",    # assert is how pytest checks
+  "PLR2004", # expected values are literals
+  "INP001",  # tests/ needs no __init__.py
+]
+
+[tool.ty.rules]
+possibly-unresolved-reference = "error"
+unused-ignore-comment = "warn"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.uv]
+# Cooling-off period: uv only resolves releases older than a week.
+exclude-newer = "1 week"
+package = false

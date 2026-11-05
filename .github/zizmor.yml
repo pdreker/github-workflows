@@ -1,0 +1,5 @@
+rules:
+  # Suggests the newer `$/...` syntax for workflows in this repository; `./...` is
+  # the long-standing form that every caller and actionlint understand.
+  self-repository:
+    disable: true

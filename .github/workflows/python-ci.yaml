@@ -1,0 +1,92 @@
+name: Python CI
+
+# Lint, format check, type check and tests for a uv project. Settings for ruff, ty and
+# pytest come from the caller's pyproject.toml; templates/pyproject-tools.toml is the
+# shared starting point.
+#
+# Caller permissions: contents: read.
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version for uv to install
+        type: string
+        default: "3.14"
+      working-directory:
+        description: Directory that holds pyproject.toml
+        type: string
+        default: "."
+      fetch-depth:
+        description: Commits to fetch; 0 for full history (Sonar needs it)
+        type: number
+        default: 1
+      pytest:
+        description: Run pytest
+        type: boolean
+        default: true
+      extra-run:
+        description: Extra shell command after the tests, e.g. "uv run mkdocs build --strict"
+        type: string
+        default: ""
+      sonar:
+        description: Run a SonarQube Cloud scan after the tests (needs secret sonar-token)
+        type: boolean
+        default: false
+    secrets:
+      sonar-token:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, type-check, test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ inputs.python-version }}
+          working-directory: ${{ inputs.working-directory }}
+      - name: Install dependencies
+        id: sync
+        # --locked: fail when uv.lock no longer matches pyproject.toml.
+        run: uv sync --locked --all-groups
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format check
+        if: ${{ !cancelled() && steps.sync.outcome == 'success' }}
+        run: uv run ruff format --check .
+      - name: Type check (ty)
+        if: ${{ !cancelled() && steps.sync.outcome == 'success' }}
+        run: uv run ty check
+      - name: Tests
+        if: ${{ !cancelled() && steps.sync.outcome == 'success' && inputs.pytest }}
+        run: uv run pytest
+      - name: Extra command
+        if: ${{ !cancelled() && steps.sync.outcome == 'success' && inputs.extra-run != '' }}
+        env:
+          EXTRA_RUN: ${{ inputs.extra-run }}
+        run: bash -euo pipefail -c "$EXTRA_RUN"
+      - name: SonarQube Cloud scan
+        # Only after all checks passed. Secrets are not passed to pull requests from
+        # forks; skip the scan there.
+        if: >-
+          ${{ success() && inputs.sonar &&
+          (github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: SonarSource/sonarqube-scan-action@4d1dc0c91ee400dcf8a6dddf2f705ac36542e304 # v8.4.0
+        with:
+          projectBaseDir: ${{ inputs.working-directory }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.sonar-token }}

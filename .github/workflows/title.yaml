@@ -1,0 +1,12 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  title:
+    uses: ./.github/workflows/pr-title.yaml

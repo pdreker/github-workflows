@@ -1,0 +1,14 @@
+# Tools for checking the workflows themselves; this repository ships no Python.
+
+[project]
+name = "github-workflows"
+version = "0.0.0"
+requires-python = ">=3.14"
+
+[dependency-groups]
+dev = ["actionlint-py", "zizmor"]
+
+[tool.uv]
+package = false
+# Cooling-off period: uv only resolves releases older than a week.
+exclude-newer = "1 week"
