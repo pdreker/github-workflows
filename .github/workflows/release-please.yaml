@@ -3,9 +3,9 @@ name: release-please
 # Maintain the release PR; merging it creates the GitHub release and tag in the same
 # run. Follow-up jobs in the caller check `release_created == 'true'`.
 #
-# With GITHUB_TOKEN the release PR triggers no other workflow. To check it before
-# merging, the caller's CI has a workflow_dispatch trigger: run it by hand on the
-# release branch; the result shows up on the PR.
+# With GITHUB_TOKEN, GitHub holds the runs on the release PR until a maintainer
+# approves them ("Approve workflows to run" on the PR); then all checks run as on any
+# other PR.
 #
 # Caller permissions: contents: write, pull-requests: write.
 

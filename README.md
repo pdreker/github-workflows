@@ -25,9 +25,6 @@ on:
   pull_request:
   push:
     branches: [main]
-  # Run by hand on the release branch before merging the release PR; release-please
-  # uses GITHUB_TOKEN, so its PR triggers no workflow on its own.
-  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -64,6 +61,9 @@ jobs:
 For another registry, pass `registry`, `registry-username` and the secret
 `registry-password`. Secrets are always passed by name, never with `secrets: inherit`:
 this repository is public and its callers include private repositories.
+
+release-please opens its PR with `GITHUB_TOKEN`; GitHub holds the checks on it until
+you approve them with "Approve workflows to run" on the PR.
 
 Required status checks are named `<caller job> / <called job>`, e.g.
 `ci / Lint, type-check, test`.
