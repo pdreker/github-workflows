@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.0](https://github.com/pdreker/github-workflows/compare/v1.0.0...v1.1.0) (2026-11-05)
+
+
+### Features
+
+* **template:** max-args = 8 ([#9](https://github.com/pdreker/github-workflows/issues/9)) ([2b99f80](https://github.com/pdreker/github-workflows/commit/2b99f8063a65fbd64645b0c2c05b07a2ffa22626))
+* **template:** ruff exceptions for deliberate characters, TRY003 and tests ([#7](https://github.com/pdreker/github-workflows/issues/7)) ([3805b5e](https://github.com/pdreker/github-workflows/commit/3805b5ed4c195e7396869a096cad630d55ea712e))
+* **template:** S104, S105, S106 off in tests ([#10](https://github.com/pdreker/github-workflows/issues/10)) ([09e2776](https://github.com/pdreker/github-workflows/commit/09e2776799666f1b26b72f9070cecb9fbf735ee2))
+
 ## 1.0.0 (2026-11-05)
 
 
