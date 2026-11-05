@@ -1,0 +1,83 @@
+name: Docker image
+
+# Build a multi-platform image and push it. Without `version` the image is tagged
+# `develop` (rolling trunk build); with `version` it gets <major>.<minor>.<patch>,
+# <major>.<minor> and <major>.
+#
+# Caller permissions: contents: read, plus packages: write for GHCR.
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Full image name without tag, e.g. ghcr.io/owner/name
+        type: string
+        required: true
+      registry:
+        description: Registry host to log in to
+        type: string
+        default: ghcr.io
+      registry-username:
+        description: Registry user; empty means the workflow actor (right for GHCR)
+        type: string
+        default: ""
+      platforms:
+        description: Target platforms for buildx
+        type: string
+        default: linux/amd64,linux/arm64
+      version:
+        description: Release version (semver, no leading v); empty builds :develop
+        type: string
+        default: ""
+      context:
+        description: Build context
+        type: string
+        default: .
+      push:
+        description: Push the image; false only builds it (self-test)
+        type: boolean
+        default: true
+    secrets:
+      registry-password:
+        description: Registry password or token; empty means GITHUB_TOKEN (right for GHCR)
+        required: false
+
+# No permissions block: a called workflow can only narrow the caller's rights, and
+# GHCR needs packages: write while Docker Hub does not. The caller job sets them.
+
+jobs:
+  image:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Log in to registry
+        if: ${{ inputs.push }}
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ inputs.registry-username || github.actor }}
+          password: ${{ secrets.registry-password || github.token }}
+      - name: Docker tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ inputs.image }}
+          tags: |
+            type=raw,value=develop,enable=${{ inputs.version == '' }}
+            type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+            type=semver,pattern={{major}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          push: ${{ inputs.push }}
+          context: ${{ inputs.context }}
+          platforms: ${{ inputs.platforms }}
+          tags: ${{ steps.meta.outputs.tags }}

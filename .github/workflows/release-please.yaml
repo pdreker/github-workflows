@@ -1,0 +1,51 @@
+name: release-please
+
+# Maintain the release PR; merging it creates the GitHub release and tag in the same
+# run. Follow-up jobs in the caller check `release_created == 'true'`.
+#
+# With GITHUB_TOKEN the release PR triggers no other workflow. To check it before
+# merging, the caller's CI has a workflow_dispatch trigger: run it by hand on the
+# release branch; the result shows up on the PR.
+#
+# Caller permissions: contents: write, pull-requests: write.
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        description: Token for release-please; empty means GITHUB_TOKEN
+        required: false
+    outputs:
+      release_created:
+        description: "'true' when this run created a release"
+        value: ${{ jobs.release.outputs.release_created }}
+      version:
+        description: Released version, e.g. 1.4.2
+        value: ${{ jobs.release.outputs.version }}
+      major:
+        value: ${{ jobs.release.outputs.major }}
+      minor:
+        value: ${{ jobs.release.outputs.minor }}
+      tag_name:
+        value: ${{ jobs.release.outputs.tag_name }}
+
+permissions: {}
+
+jobs:
+  release:
+    name: release-please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create release, tag and the release branch
+      pull-requests: write # open and update the release PR
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      version: ${{ steps.release.outputs.version }}
+      major: ${{ steps.release.outputs.major }}
+      minor: ${{ steps.release.outputs.minor }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          token: ${{ secrets.token || github.token }}
