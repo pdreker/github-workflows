@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/pdreker/github-workflows/compare/v1.1.0...v1.1.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **ci:** exact uv; Python from the repository's .python-version ([#12](https://github.com/pdreker/github-workflows/issues/12)) ([16516a7](https://github.com/pdreker/github-workflows/commit/16516a7546753ba1ad5845f780e006fa38f5618f))
+
 ## [1.1.0](https://github.com/pdreker/github-workflows/compare/v1.0.0...v1.1.0) (2026-11-05)
 
 
