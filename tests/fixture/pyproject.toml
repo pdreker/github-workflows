@@ -25,6 +25,10 @@ ignore = [
   "COM812", # trailing comma, conflicts with the formatter
   "ISC001", # implicit string concatenation, conflicts with the formatter
   "ANN204", # return type of __init__ and other special methods
+  "TRY003", # long messages in exception calls; a domain error's message is its content
+  "RUF001", # ambiguous characters: ×, –, ℮, › and the like are written on purpose
+  "RUF002", # same, in docstrings
+  "RUF003", # same, in comments
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -33,6 +37,10 @@ ignore = [
   "S101",    # assert is how pytest checks
   "PLR2004", # expected values are literals
   "INP001",  # tests/ needs no __init__.py
+  "SLF001",  # tests may check private members
+  "ARG001",  # pytest fixtures requested only for their effect
+  "ARG002",  # same, in test methods
+  "ANN401",  # Any is fine for mocks and fakes
 ]
 
 [tool.ty.rules]
