@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/pdreker/github-workflows/compare/v1.1.1...v1.2.0) (2026-11-05)
+
+
+### Features
+
+* **ci:** test build of the image in python-ci ([#14](https://github.com/pdreker/github-workflows/issues/14)) ([8d57073](https://github.com/pdreker/github-workflows/commit/8d57073403e1b4c3d45abcf00aaf9f226bb65cc1))
+
 ## [1.1.1](https://github.com/pdreker/github-workflows/compare/v1.1.0...v1.1.1) (2026-11-05)
 
 
