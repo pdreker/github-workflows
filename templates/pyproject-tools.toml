@@ -12,10 +12,51 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-  "E", "W", "F", "C90", "I", "N", "UP", "YTT", "ANN", "ASYNC", "S", "BLE", "FBT", "B",
-  "A", "COM", "C4", "DTZ", "T10", "EM", "FA", "ISC", "G", "INP", "PIE", "T20", "PT", "Q",
-  "RSE", "RET", "SLF", "SLOT", "SIM", "INT", "ARG", "PTH", "TD", "FIX", "PGH", "PL", "TRY",
-  "FLY", "PERF", "FURB", "LOG", "RUF",
+  "E", "W", # pycodestyle
+  "F",      # Pyflakes
+  "C90",    # McCabe (function complexity)
+  "I",      # isort
+  "N",      # PEP 8 naming
+  "UP",     # pyupgrade
+  "YTT",    # flake8-2020
+  "ANN",    # flake8-annotations
+  "ASYNC",  # flake8-async
+  "S",      # flake8-bandit
+  "BLE",    # blind except
+  "FBT",    # boolean traps
+  "B",      # bugbear
+  "A",      # flake8-builtins
+  "COM",    # flake8-commas
+  "C4",     # flake8-comprehensions
+  "DTZ",    # naive datetime objects
+  "T10",    # debugger imports
+  "EM",     # error message formatting
+  "FA",     # future annotations
+  "ISC",    # implicit string concatenation
+  "G",      # logging format
+  "INP",    # implicit namespace packages
+  "PIE",    # various anti-patterns
+  "T20",    # print() calls
+  "PT",     # pytest style
+  "Q",      # quotes
+  "RSE",    # raise syntax
+  "RET",    # return values
+  "SLF",    # private member access
+  "SLOT",   # __slots__
+  "SIM",    # simplify
+  "INT",    # gettext
+  "ARG",    # unused arguments
+  "PTH",    # pathlib
+  "TD",     # TODO comments
+  "FIX",    # FIXME/XXX
+  "PGH",    # pygrep-hooks
+  "PL",     # Pylint
+  "TRY",    # try/except anti-patterns
+  "FLY",    # join vs f-strings
+  "PERF",   # performance
+  "FURB",   # refurb (modernize)
+  "LOG",    # logging
+  "RUF",    # ruff's own rules
 ]
 ignore = [
   "E203",   # whitespace before ':', conflicts with the formatter
