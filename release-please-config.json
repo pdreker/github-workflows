@@ -3,7 +3,8 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "github-workflows"
+      "package-name": "github-workflows",
+      "include-component-in-tag": false
     }
   }
 }
