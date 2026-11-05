@@ -81,6 +81,11 @@ ignore = [
   "ANN401",  # Any is fine for mocks and fakes
 ]
 
+[tool.ruff.lint.pylint]
+# Pylint's default of 5 flagged UI builders, drawing helpers and filter functions in every
+# SportShooters repository; up to 8 still reads.
+max-args = 8
+
 [tool.ty.rules]
 possibly-unresolved-reference = "error"
 unused-ignore-comment = "warn"
