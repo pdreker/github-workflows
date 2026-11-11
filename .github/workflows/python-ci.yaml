@@ -38,8 +38,9 @@ on:
       sonar-token:
         required: false
 
-permissions:
-  contents: read
+# No permissions block: a called workflow can only narrow the caller's rights, and the
+# test build needs packages: read for a private image from GHCR while every other
+# project does not. The caller job sets them.
 
 jobs:
   ci:
