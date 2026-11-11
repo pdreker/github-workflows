@@ -5,7 +5,7 @@ updates land here once instead of in every repository.
 
 | Workflow | Does | Caller permissions |
 |---|---|---|
-| `python-ci.yaml` | `uv sync --locked`, ruff check, ruff format check, ty, pytest; a test build of the image (`linux/amd64`, no push) when the project has a `Dockerfile`; optional extra command and SonarQube Cloud scan | `contents: read` |
+| `python-ci.yaml` | `uv sync --locked`, ruff check, ruff format check, ty, pytest; a test build of the image (`linux/amd64`, no push) when the project has a `Dockerfile`, logged in to GHCR so it can take a private image from there; optional extra command and SonarQube Cloud scan | `contents: read`, plus `packages: read` for a private image from GHCR |
 | `docker-image.yaml` | multi-platform build with buildx and push; `:develop` without `version`, semver tags with it | `contents: read`, plus `packages: write` for GHCR |
 | `release-please.yaml` | release PR, release and tag; outputs `release_created`, `version`, `major`, `minor`, `tag_name` | `contents: write`, `pull-requests: write` |
 | `pr-title.yaml` | Conventional Commits check on the PR title (repositories squash-merge) | `pull-requests: read` |
