@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/pdreker/github-workflows/compare/v1.2.0...v1.3.0) (2026-11-11)
+
+
+### Features
+
+* **python-ci:** log in to GHCR before the test build of the image ([#16](https://github.com/pdreker/github-workflows/issues/16)) ([123b478](https://github.com/pdreker/github-workflows/commit/123b478951f647f767a8e54b458781825aed7231))
+
 ## [1.2.0](https://github.com/pdreker/github-workflows/compare/v1.1.1...v1.2.0) (2026-11-05)
 
 
