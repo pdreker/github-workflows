@@ -57,7 +57,7 @@ jobs:
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           # Exact uv: without it every run installs the newest uv, with no PR and no cooling-off.
-          version: "0.13.6"
+          version: "0.13.7"
           python-version: ${{ inputs.python-version }}
           working-directory: ${{ inputs.working-directory }}
       - name: Install dependencies
