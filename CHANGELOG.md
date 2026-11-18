@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/pdreker/github-workflows/compare/v1.3.1...v1.4.0) (2026-11-18)
+
+
+### Features
+
+* PR title check and image smoke run as steps of python-ci, build cache ([#26](https://github.com/pdreker/github-workflows/issues/26)) ([80f6eb5](https://github.com/pdreker/github-workflows/commit/80f6eb534bf5800994988cf404e3b2c99e5ddafe))
+
 ## [1.3.1](https://github.com/pdreker/github-workflows/compare/v1.3.0...v1.3.1) (2026-11-11)
 
 
