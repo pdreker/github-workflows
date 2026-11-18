@@ -5,10 +5,10 @@ updates land here once instead of in every repository.
 
 | Workflow | Does | Caller permissions |
 |---|---|---|
-| `python-ci.yaml` | `uv sync --locked`, ruff check, ruff format check, ty, pytest; a test build of the image (`linux/amd64`, no push) when the project has a `Dockerfile`, logged in to GHCR so it can take a private image from there; optional extra command and SonarQube Cloud scan | `contents: read`, plus `packages: read` for a private image from GHCR |
+| `python-ci.yaml` | `uv sync --locked`, ruff check, ruff format check, ty, pytest; a test build of the image (`linux/amd64`, no push) when the project has a `Dockerfile`, logged in to GHCR so it can take a private image from there; optional smoke run of that image, extra command, PR title check and SonarQube Cloud scan | `contents: read`, plus `packages: read` for a private image from GHCR, plus `pull-requests: read` with `pr-title` |
 | `docker-image.yaml` | multi-platform build with buildx and push; `:develop` without `version`, semver tags with it | `contents: read`, plus `packages: write` for GHCR |
 | `release-please.yaml` | release PR, release and tag; outputs `release_created`, `version`, `major`, `minor`, `tag_name` | `contents: write`, `pull-requests: write` |
-| `pr-title.yaml` | Conventional Commits check on the PR title (repositories squash-merge) | `pull-requests: read` |
+| `pr-title.yaml` | Conventional Commits check on the PR title as a job of its own (repositories squash-merge); private repositories use `pr-title` in `python-ci.yaml` instead | `pull-requests: read` |
 
 `templates/pyproject-tools.toml` is the shared starting point for ruff, ty, pytest and
 uv settings. ruff cannot load settings from another repository, so each repository
@@ -23,14 +23,34 @@ Pin a commit SHA with the version as comment; Renovate updates both.
 name: CI
 on:
   pull_request:
-  push:
-    branches: [main]
+    # edited: a title change reruns CI, which holds the title check
+    types: [opened, edited, reopened, synchronize]
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   ci:
+    permissions:
+      contents: read
+      pull-requests: read
     uses: pdreker/github-workflows/.github/workflows/python-ci.yaml@<sha> # v1.0.0
+    with:
+      pr-title: true
 ```
+
+### Actions minutes
+
+GitHub bills private repositories per job, each rounded up to a full minute, so most
+of the cost of short checks is the rounding. Hence:
+
+- One CI job per pull request: the title check and an image smoke run are steps of
+  `python-ci.yaml`, not jobs of their own.
+- CI runs on pull requests only. A repository that pushes to `main` directly (no pull
+  requests) adds `push: branches: [main]` instead.
+- Image builds use the GitHub Actions cache (`type=gha`); the test build in
+  `python-ci.yaml` also reads the cache of `docker-image.yaml`.
 
 ```yaml
 # .github/workflows/release.yaml

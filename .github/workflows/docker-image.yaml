@@ -81,3 +81,6 @@ jobs:
           context: ${{ inputs.context }}
           platforms: ${{ inputs.platforms }}
           tags: ${{ steps.meta.outputs.tags }}
+          # The test build in python-ci reads this scope as well.
+          cache-from: type=gha,scope=image
+          cache-to: type=gha,scope=image,mode=max
