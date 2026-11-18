@@ -135,8 +135,10 @@ jobs:
         if: ${{ !cancelled() && inputs.image-smoke != '' && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
         env:
           IMAGE_SMOKE: ${{ inputs.image-smoke }}
-        # Word splitting of $IMAGE_SMOKE is intended: it holds the arguments.
-        run: docker run --rm python-ci:test $IMAGE_SMOKE
+        # IMAGE_SMOKE holds the arguments, split at whitespace.
+        run: |
+          read -ra args <<< "$IMAGE_SMOKE"
+          docker run --rm python-ci:test "${args[@]}"
       # Last, so a bad title does not skip the other checks.
       - name: Conventional PR title
         if: ${{ !cancelled() && inputs.pr-title && github.event_name == 'pull_request' }}
