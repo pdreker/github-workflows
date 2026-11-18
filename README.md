@@ -23,8 +23,6 @@ Pin a commit SHA with the version as comment; Renovate updates both.
 name: CI
 on:
   pull_request:
-    # edited: a title change reruns CI, which holds the title check
-    types: [opened, edited, reopened, synchronize]
 permissions:
   contents: read
 concurrency:
@@ -39,6 +37,33 @@ jobs:
     with:
       pr-title: true
 ```
+
+```yaml
+# .github/workflows/ci-title-edit.yaml
+# A title edit reruns the full CI; a description edit skips (free).
+name: CI title edit
+on:
+  pull_request:
+    types: [edited]
+permissions:
+  contents: read
+concurrency:
+  group: ci-title-edit-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  ci: # same job name: the run reports the required check
+    if: ${{ github.event.changes.title != null }}
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: pdreker/github-workflows/.github/workflows/python-ci.yaml@<sha> # v1.0.0
+    with:
+      pr-title: true
+```
+
+The title edit gets a workflow of its own because `edited` also fires for the
+description. A skipped run of `ci.yaml` itself blocks the merge, although its required
+check has passed; a skipped run of another workflow does not.
 
 ### Actions minutes
 

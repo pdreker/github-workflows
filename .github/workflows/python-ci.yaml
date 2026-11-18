@@ -17,9 +17,10 @@ on:
       pr-title:
         description: >-
           Check the pull request title against Conventional Commits (squash merges make it
-          the commit release-please reads). The caller triggers on pull_request with types
-          [opened, edited, reopened, synchronize], so a title edit reruns the whole job and
-          never turns an earlier red result green.
+          the commit release-please reads). A title edit must rerun the whole job, so it
+          never turns an earlier red result green: callers add a second workflow on
+          pull_request [edited] with the same job name and
+          `if: github.event.changes.title != null` (see README).
         type: boolean
         default: false
       python-version:
