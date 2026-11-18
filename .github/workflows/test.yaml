@@ -33,9 +33,14 @@ jobs:
         run: uv run zizmor --offline .github/workflows
 
   python-ci:
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/python-ci.yaml
     with:
       working-directory: tests/fixture
+      pr-title: true
+      image-smoke: cat /fixture.py
 
   docker-image:
     uses: ./.github/workflows/docker-image.yaml

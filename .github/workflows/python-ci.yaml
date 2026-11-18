@@ -5,11 +5,23 @@ name: Python CI
 # shared starting point.
 #
 # Caller permissions: contents: read; plus packages: read when the Dockerfile takes a
-# private image from GHCR (the test build logs in there with GITHUB_TOKEN).
+# private image from GHCR (the test build logs in there with GITHUB_TOKEN); plus
+# pull-requests: read with pr-title.
+#
+# One job on purpose: GitHub bills every job rounded up to a full minute, so a second
+# job of a few seconds (title check, image smoke test) costs a whole extra minute.
 
 on:
   workflow_call:
     inputs:
+      pr-title:
+        description: >-
+          Check the pull request title against Conventional Commits (squash merges make it
+          the commit release-please reads). The caller triggers on pull_request with types
+          [opened, edited, reopened, synchronize], so a title edit reruns the whole job and
+          never turns an earlier red result green.
+        type: boolean
+        default: false
       python-version:
         description: Python version for uv to install; empty takes the repository's .python-version
         type: string
@@ -28,6 +40,12 @@ on:
         default: true
       extra-run:
         description: Extra shell command after the tests, e.g. "uv run mkdocs build --strict"
+        type: string
+        default: ""
+      image-smoke:
+        description: >-
+          Arguments for a smoke run of the test image (docker run --rm <image> <args>),
+          e.g. "--version"; empty skips it
         type: string
         default: ""
       sonar:
@@ -73,6 +91,17 @@ jobs:
       - name: Type check (ty)
         if: ${{ !cancelled() && steps.sync.outcome == 'success' }}
         run: uv run ty check
+      # For a Dockerfile that takes a private image from GHCR (FROM or COPY --from), and for
+      # an extra-run that pulls one. Before the tests so both can use it. The
+      # token reads such a package only if the caller job has packages: read and the
+      # package grants the repository access; public images need neither.
+      - name: Log in to GHCR
+        if: ${{ !cancelled() && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
       - name: Tests
         if: ${{ !cancelled() && steps.sync.outcome == 'success' && inputs.pytest }}
         run: uv run pytest
@@ -87,16 +116,6 @@ jobs:
       - name: Set up Docker Buildx
         if: ${{ !cancelled() && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      # For a Dockerfile that takes a private image from GHCR (FROM or COPY --from). The
-      # token reads such a package only if the caller job has packages: read and the
-      # package grants the repository access; public images need neither.
-      - name: Log in to GHCR
-        if: ${{ !cancelled() && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
       - name: Build image (test, linux/amd64, no push)
         if: ${{ !cancelled() && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -104,6 +123,28 @@ jobs:
           context: ${{ inputs.working-directory }}
           platforms: linux/amd64
           push: false
+          load: ${{ inputs.image-smoke != '' }}
+          tags: python-ci:test
+          # Read the cache of the main/release build too: CI no longer runs on main, so
+          # without it a new pull request would never find a cache it may read.
+          cache-from: |
+            type=gha,scope=test
+            type=gha,scope=image
+          cache-to: type=gha,scope=test,mode=max
+      - name: Image smoke run
+        if: ${{ !cancelled() && inputs.image-smoke != '' && hashFiles(format('{0}/Dockerfile', inputs.working-directory)) != '' }}
+        env:
+          IMAGE_SMOKE: ${{ inputs.image-smoke }}
+        # IMAGE_SMOKE holds the arguments, split at whitespace.
+        run: |
+          read -ra args <<< "$IMAGE_SMOKE"
+          docker run --rm python-ci:test "${args[@]}"
+      # Last, so a bad title does not skip the other checks.
+      - name: Conventional PR title
+        if: ${{ !cancelled() && inputs.pr-title && github.event_name == 'pull_request' }}
+        uses: amannn/action-semantic-pull-request@2252a14e810aa9b85c2d560bd7070c802206ecf6 # v6.1.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: SonarQube Cloud scan
         # Only after all checks passed. Secrets are not passed to pull requests from
         # forks; skip the scan there.
